@@ -58,12 +58,18 @@ pipeline {
         }
 
         stage('Test') {
-            steps {
-                echo "Verifying Calendar application on Tomcat1..."
-                sh 'curl -f -I http://${SERVER_IP_1}:8080/Calendar/ || exit 1'
+    steps {
+        echo "Waiting for Tomcat to start the applications..."
+        // sleep for 20 seconds
+        sleep(time: 20, unit: 'SECONDS')
 
-                echo "Verifying Calendar application on Tomcat2..."
-                sh 'curl -f -I http://${SERVER_IP_2}:8080/Calendar/ || exit 1'
+        echo "Verifying Calendar application on Tomcat1..."
+        sh 'curl -f -I http://${SERVER_IP_1}:8080/Calendar/ || exit 1'
+
+        echo "Verifying Calendar application on Tomcat2..."
+        sh 'curl -f -I http://${SERVER_IP_2}:8080/Calendar/ || exit 1'
+    
+
             }
         }
     }
