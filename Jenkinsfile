@@ -12,7 +12,7 @@ pipeline {
         USER_NAME   = "ubuntu"
         TMP_DIR     = "/tmp/App/"
         TOMCAT_DIR  = "/opt/tomcat/webapps/"
-        REPO_DIR    = "$WORKSPACE/Apache_Stratos_Tomcat_Applications-fork"
+        REPO_DIR    = "${WORKSPACE}/Apache_Stratos_Tomcat_Applications-fork"
     }
 
     stages {
