@@ -19,8 +19,9 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Cloning repository..."
-                sh 'git clone -b master https://github.com/anandg7259/Apache_Stratos_Tomcat_Applications-fork.git'
-
+                sh """
+                    git clone -b master https://github.com/anandg7259/Apache_Stratos_Tomcat_Applications-fork.git
+                """
             }
         }
 
@@ -28,10 +29,13 @@ pipeline {
             steps {
                 echo "Deploying WAR to Tomcat1..."
                 sh """
-                    WAR_FILE=${REPO_DIR}/*.war
-
+                    WAR_FILE=\$(ls ${REPO_DIR}/*.war | head -n 1)
+                    if [ -z "\$WAR_FILE" ]; then
+                        echo "No WAR file found!"
+                        exit 1
+                    fi
                     ssh ${USER_NAME}@${SERVER_IP_1} "mkdir -p ${TMP_DIR}"
-                    scp ${WAR_FILE} ${USER_NAME}@${SERVER_IP_1}:${TMP_DIR}
+                    scp \$WAR_FILE ${USER_NAME}@${SERVER_IP_1}:${TMP_DIR}
                     ssh ${USER_NAME}@${SERVER_IP_1} "sudo mv ${TMP_DIR}/*.war ${TOMCAT_DIR}"
                 """
             }
@@ -41,10 +45,13 @@ pipeline {
             steps {
                 echo "Deploying WAR to Tomcat2..."
                 sh """
-                    WAR_FILE=${REPO_DIR}/*.war
-
+                    WAR_FILE=\$(ls ${REPO_DIR}/*.war | head -n 1)
+                    if [ -z "\$WAR_FILE" ]; then
+                        echo "No WAR file found!"
+                        exit 1
+                    fi
                     ssh ${USER_NAME}@${SERVER_IP_2} "mkdir -p ${TMP_DIR}"
-                    scp ${WAR_FILE} ${USER_NAME}@${SERVER_IP_2}:${TMP_DIR}
+                    scp \$WAR_FILE ${USER_NAME}@${SERVER_IP_2}:${TMP_DIR}
                     ssh ${USER_NAME}@${SERVER_IP_2} "sudo mv ${TMP_DIR}/*.war ${TOMCAT_DIR}"
                 """
             }
@@ -53,14 +60,10 @@ pipeline {
         stage('Test') {
             steps {
                 echo "Verifying Calendar application on Tomcat1..."
-                sh """
-                    curl -f -I http://${SERVER_IP_1}:8080/Calendar/ || exit 1
-                """
+                sh 'curl -f -I http://${SERVER_IP_1}:8080/Calendar/ || exit 1'
 
                 echo "Verifying Calendar application on Tomcat2..."
-                sh """
-                    curl -f -I http://${SERVER_IP_2}:8080/Calendar/ || exit 1
-                """
+                sh 'curl -f -I http://${SERVER_IP_2}:8080/Calendar/ || exit 1'
             }
         }
     }
