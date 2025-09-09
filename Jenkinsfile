@@ -19,7 +19,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Cloning repository..."
-                sh 'git clone https://github.com/anandg7259/Apache_Stratos_Tomcat_Applications-fork.git'
+                sh 'git clone -b master https://github.com/anandg7259/Apache_Stratos_Tomcat_Applications-fork.git'
+
             }
         }
 
