@@ -1,10 +1,6 @@
 pipeline {
     agent { label 'August_label' }
 
-    tools {
-        jdk 'JDK17'
-        maven 'Maven3'
-    }
 
     environment {
         SERVER_IP_1 = "172.31.30.142"
