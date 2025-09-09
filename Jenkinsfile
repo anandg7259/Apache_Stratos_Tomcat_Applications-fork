@@ -16,7 +16,7 @@ pipeline {
         stage('Deploy to Tomcat1') {
             steps {
                 sh '''
-                    WAR_FILE="/home/ubuntu/Apache_Stratos_Tomcat_Applications-fork/*.war"
+                    WAR_FILE="/home/ubuntu/workspace/tomcat_prod/Apache_Stratos_Tomcat_Applications-fork/*.war"
                     SERVER_IP_1=“172.31.30.142"
                     USER_NAME="ubuntu"
                     TMP_DIR=“/tmp/App/"
@@ -36,7 +36,7 @@ pipeline {
       stage('Deploy to Tomcat2') {
             steps {
                 sh '''
-                    WAR_FILE="/home/ubuntu/Apache_Stratos_Tomcat_Applications-fork/*.war"
+                    WAR_FILE="/home/ubuntu/workspace/tomcat_prod/Apache_Stratos_Tomcat_Applications-fork/*.war"
 
                     SERVER_IP_2=“172.31.29.157"
                     USER_NAME="ubuntu"
