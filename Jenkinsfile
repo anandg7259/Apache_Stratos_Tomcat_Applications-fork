@@ -1,74 +1,66 @@
 pipeline {
-    agent { label 'August_label' }   
+    agent { label 'August_label' }
 
     tools {
         jdk 'JDK17'
         maven 'Maven3'
     }
 
+    environment {
+        SERVER_IP_1 = "172.31.30.142"
+        SERVER_IP_2 = "172.31.29.157"
+        USER_NAME   = "ubuntu"
+        TMP_DIR     = "/tmp/App/"
+        TOMCAT_DIR  = "/opt/tomcat/webapps/"
+        REPO_DIR    = "$WORKSPACE/Apache_Stratos_Tomcat_Applications-fork"
+    }
+
     stages {
         stage('Build') {
             steps {
-                sh ‘git clone https://github.com/anandg7259/Apache_Stratos_Tomcat_Applications-fork.git'
+                echo "Cloning repository..."
+                sh 'git clone https://github.com/anandg7259/Apache_Stratos_Tomcat_Applications-fork.git'
             }
         }
 
         stage('Deploy to Tomcat1') {
             steps {
-                sh '''
-                    WAR_FILE="/home/ubuntu/workspace/tomcat_prod/Apache_Stratos_Tomcat_Applications-fork/*.war"
-                    SERVER_IP_1=“172.31.30.142"
-                    USER_NAME="ubuntu"
-                    TMP_DIR=“/tmp/App/"
-                    TOMCAT_DIR="/opt/tomcat/webapps/"
+                echo "Deploying WAR to Tomcat1..."
+                sh """
+                    WAR_FILE=${REPO_DIR}/*.war
 
-                    # Create temp dir on remote
                     ssh ${USER_NAME}@${SERVER_IP_1} "mkdir -p ${TMP_DIR}"
-
-                    # Copy artifact
                     scp ${WAR_FILE} ${USER_NAME}@${SERVER_IP_1}:${TMP_DIR}
-
-                    # Move artifact into Tomcat webapps
                     ssh ${USER_NAME}@${SERVER_IP_1} "sudo mv ${TMP_DIR}/*.war ${TOMCAT_DIR}"
-                '''
+                """
             }
-     }
-      stage('Deploy to Tomcat2') {
+        }
+
+        stage('Deploy to Tomcat2') {
             steps {
-                sh '''
-                    WAR_FILE="/home/ubuntu/workspace/tomcat_prod/Apache_Stratos_Tomcat_Applications-fork/*.war"
+                echo "Deploying WAR to Tomcat2..."
+                sh """
+                    WAR_FILE=${REPO_DIR}/*.war
 
-                    SERVER_IP_2=“172.31.29.157"
-                    USER_NAME="ubuntu"
-                    TMP_DIR=“/tmp/App/"
-                    TOMCAT_DIR="/opt/tomcat/webapps/"
-
-                    # Create temp dir on remote
                     ssh ${USER_NAME}@${SERVER_IP_2} "mkdir -p ${TMP_DIR}"
-
-                    # Copy artifact
                     scp ${WAR_FILE} ${USER_NAME}@${SERVER_IP_2}:${TMP_DIR}
-
-                    # Move artifact into Tomcat webapps
                     ssh ${USER_NAME}@${SERVER_IP_2} "sudo mv ${TMP_DIR}/*.war ${TOMCAT_DIR}"
-                '''   
-    }
-}
+                """
+            }
+        }
 
+        stage('Test') {
+            steps {
+                echo "Verifying Calendar application on Tomcat1..."
+                sh """
+                    curl -f -I http://${SERVER_IP_1}:8080/Calendar/ || exit 1
+                """
 
-stage('Test') {
-    steps {
-        echo "Verifying Calendar application on Tomcat1..."
-        sh """
-        curl -I http://${SERVER_IP_1}:8080/Calendar/ || exit 1
-        """
-
-        echo "Verifying Calendar application on Tomcat2..."
-        sh """
-        curl -I http://${SERVER_IP_2}:8080/Calendar/ || exit 1
-        """
-    }
-}
-
+                echo "Verifying Calendar application on Tomcat2..."
+                sh """
+                    curl -f -I http://${SERVER_IP_2}:8080/Calendar/ || exit 1
+                """
+            }
+        }
     }
 }
