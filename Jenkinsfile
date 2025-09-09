@@ -18,13 +18,18 @@ pipeline {
 
     stages {
         stage('Build') {
-            steps {
-                echo "Cloning repository..."
-                sh """
-                    git clone -b master https://github.com/anandg7259/Apache_Stratos_Tomcat_Applications-fork.git
-                """
-            }
-        }
+    steps {
+        echo "Cloning repository..."
+        sh """
+            if [ -d "${REPO_DIR}" ]; then
+                cd ${REPO_DIR} && git pull
+            else
+                git clone -b master https://github.com/anandg7259/Apache_Stratos_Tomcat_Applications-fork.git
+            fi
+        """
+    }
+}
+
 
         stage('Deploy to Tomcat1') {
             steps {
